@@ -1,11 +1,6 @@
 from bs4 import BeautifulSoup
-import csv
-from os import mkdir
-from os.path import exists, join
-datadir = join('..', 'data')
-if not exists(datadir):
-    mkdir(datadir)
-source_page = open('List_of_S%26P_500_companies.html').read()
+import urllib2
+source_page = urllib2.urlopen('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies').read()
 soup = BeautifulSoup(source_page, 'html.parser')
 table = soup.find("table", { "class" : "wikitable sortable" })
 
@@ -21,13 +16,10 @@ for row in rows:
     fields = row.findAll('td')
     if fields:
         symbol = fields[0].string
-        name = fields[1].string
-        sector = fields[3].string
-        records.append([symbol, name, sector])
+        records.append(symbol)
 
-header = ['Symbol', 'Name', 'Sector']
-writer = csv.writer(open('../data/constituents.csv', 'w'), lineterminator='\n')
-writer.writerow(header)
+f = open("tickers.txt",'w')
 # Sorting ensure easy tracking of modifications
-records.sort(key=lambda s: s[1].lower())
-writer.writerows(records)    
+records.sort(key=lambda s: s.lower())
+for t in records:
+	f.write(t + "\n") 
